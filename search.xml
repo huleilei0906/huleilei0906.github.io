@@ -27,170 +27,6 @@
       </tags>
   </entry>
   <entry>
-    <title>ArrayList扩容机制</title>
-    <url>/2020/05/26/ArrayList%E6%89%A9%E5%AE%B9%E6%9C%BA%E5%88%B6/</url>
-    <content><![CDATA[<blockquote>
-<p><strong>本文的出现是为了能够分享个人所学的相关知识，检验自身学习成果。内容会和其他技术存在部分关联，如有任何描述错误或者说明有误的地方，还望各位大佬指出。</strong> </p>
-</blockquote>
-<h1 id="1-背景"><a href="#1-背景" class="headerlink" title="1. 背景"></a>1. 背景</h1><p>面试的时候问到过ArrayList的扩容机制以及HashMap的扩容机制，今天来讲讲ArrayList的扩容机制。</p>
-<h1 id="2-环境"><a href="#2-环境" class="headerlink" title="2. 环境"></a>2. 环境</h1><p>JDK1.8</p>
-<h1 id="3-详解"><a href="#3-详解" class="headerlink" title="3.详解"></a>3.详解</h1><h3 id="3-1-默认容量"><a href="#3-1-默认容量" class="headerlink" title="3.1 默认容量"></a>3.1 默认容量</h3><p> ArrayList若未指定长度默认空间长度为10，可见ArrayList中<strong>“DEFAULT_CAPACITY”</strong>属性，<strong>“size”</strong>属性为元素个数。最大长度为2^31-1-8，见ArrayList中<strong>“MAX_ARRAY_SIZE”</strong>属性。</p>
-<h3 id="3-2-扩容"><a href="#3-2-扩容" class="headerlink" title="3.2 扩容"></a>3.2 扩容</h3><p> 触发扩容的对外方法都在ArrayList.add<em>()的几个方法中，发现长度大于空间长度时调用*</em>“grow()”**,源码如下；</p>
-<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">add</span><span class="params">(<span class="keyword">int</span> index, E element)</span> </span>&#123;</span><br><span class="line">    rangeCheckForAdd(index);</span><br><span class="line"></span><br><span class="line">    ensureCapacityInternal(size + <span class="number">1</span>);  <span class="comment">// Increments modCount!!</span></span><br><span class="line">    System.arraycopy(elementData, index, elementData, index + <span class="number">1</span>,</span><br><span class="line">                     size - index);</span><br><span class="line">    elementData[index] = element;</span><br><span class="line">    size++;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">private</span> <span class="keyword">void</span> <span class="title">ensureExplicitCapacity</span><span class="params">(<span class="keyword">int</span> minCapacity)</span> </span>&#123;</span><br><span class="line">    modCount++;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (minCapacity - elementData.length &gt; <span class="number">0</span>)</span><br><span class="line">        grow(minCapacity);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<a id="more"></a>
-
-<p>扩容主要操作是在代码就在grow()方法中，源码及解析如下：</p>
-<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">private</span> <span class="keyword">void</span> <span class="title">grow</span><span class="params">(<span class="keyword">int</span> minCapacity)</span> </span>&#123;</span><br><span class="line">   	<span class="comment">// oldCapacity为旧容量，newCapacity为新容量</span></span><br><span class="line">    <span class="keyword">int</span> oldCapacity = elementData.length;</span><br><span class="line">    <span class="comment">// 将oldCapacity 右移一位，其效果相当于oldCapacity /2，</span></span><br><span class="line">    <span class="comment">// 我们知道位运算的速度远远快于整除运算，整句运算式的结果就是将新容量更新为旧容量的1.5倍，</span></span><br><span class="line">    <span class="keyword">int</span> newCapacity = oldCapacity + (oldCapacity &gt;&gt; <span class="number">1</span>);</span><br><span class="line">    <span class="comment">// 检查新计算出的容量数值和实际所需容量数值比较，若计算出的容量数值小于实际所需容量数值，则用实际容量的数值</span></span><br><span class="line">    <span class="keyword">if</span> (newCapacity - minCapacity &lt; <span class="number">0</span>)</span><br><span class="line">        newCapacity = minCapacity;</span><br><span class="line">    <span class="comment">// 检查新计算出的容量数值是否超过ArrayList最大长度，如果minCapacity大于最大容量，新容量为`Integer.MAX_VALUE`，否则，新容量大小则为 MAX_ARRAY_SIZE 即为 `Integer.MAX_VALUE - 8`</span></span><br><span class="line">    <span class="keyword">if</span> (newCapacity - MAX_ARRAY_SIZE &gt; <span class="number">0</span>)</span><br><span class="line">        newCapacity = hugeCapacity(minCapacity);</span><br><span class="line">    <span class="comment">// 调用copy方法</span></span><br><span class="line">    elementData = Arrays.copyOf(elementData, newCapacity);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">int</span> <span class="title">hugeCapacity</span><span class="params">(<span class="keyword">int</span> minCapacity)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">if</span> (minCapacity &lt; <span class="number">0</span>) <span class="comment">// overflow</span></span><br><span class="line">        <span class="keyword">throw</span> <span class="keyword">new</span> OutOfMemoryError();</span><br><span class="line">    <span class="keyword">return</span> (minCapacity &gt; MAX_ARRAY_SIZE) ?</span><br><span class="line">        <span class="comment">// MAX_ARRAY_SIZE = Integer.MAX_VALUE-8</span></span><br><span class="line">        Integer.MAX_VALUE :</span><br><span class="line">    MAX_ARRAY_SIZE;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>ArrayList扩容机制如下：</p>
-<p>1.普遍情况下，新容量是旧容量1.5倍，同时校验新容量是否超过 MAX_ARRAY_SIZE（Integer.MAX_VALUE - 8）。</p>
-<p>2.当在扩容1.5倍后，校验新容量是否超过MAX_ARRAY_SIZE（Integer.MAX_VALUE - 8），若新容量（源码中newCapacity）大于最大容量 MAX_ARRAY_SIZE（Integer.MAX_VALUE - 8）时,新容量为Integer.MAX_VALUE，否则为 MAX_ARRAY_SIZE（Integer.MAX_VALUE - 8）;</p>
-]]></content>
-      <categories>
-        <category>Java</category>
-        <category>ArrayList</category>
-      </categories>
-      <tags>
-        <tag>Java</tag>
-        <tag>ArrayList</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>AOP实战-AspectJ</title>
-    <url>/2020/05/27/AOP%E5%AE%9E%E6%88%98-AspectJ/</url>
-    <content><![CDATA[<blockquote>
-<p><strong>本文的出现是为了能够分享个人所学的相关知识，检验自身学习成果。内容会和其他技术存在部分关联，如有任何描述错误或者说明有误的地方，还望各位大佬指出。</strong> </p>
-</blockquote>
-<h1 id="1-背景"><a href="#1-背景" class="headerlink" title="1. 背景"></a>1. 背景</h1><p>用过Spring的都知道DI和AOP，今天介绍一个实现AOP超级且方便功能强大的框架AspectJ。此文默认读者有一定spring基础。</p>
-<h1 id="2-环境"><a href="#2-环境" class="headerlink" title="2. 环境"></a>2. 环境</h1><blockquote>
-<p>JDK：1.8</p>
-<p>架构：SpringBoot</p>
-</blockquote>
-<h1 id="3-详解"><a href="#3-详解" class="headerlink" title="3. 详解"></a>3. 详解</h1><h2 id="3-1-基础概念"><a href="#3-1-基础概念" class="headerlink" title="3.1 基础概念"></a>3.1 基础概念</h2><p>Aspect：切面</p>
-<p>Pointcut：切点，通过不同切入点，执行不同操作，此文中展示execution时机执行的操作。</p>
-<p>Advice：通知，包括前置通知、后置通知、异常通知、环绕通知等等；其中，环绕通知功能最为强大。此文展示环绕通知用法。</p>
-<h2 id="3-2-AspectJ依赖："><a href="#3-2-AspectJ依赖：" class="headerlink" title="3.2 AspectJ依赖："></a>3.2 AspectJ依赖：</h2><figure class="highlight xml"><table><tr><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">dependency</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>org.aspectj<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>aspectjweaver<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">version</span>&gt;</span>1.9.5<span class="tag">&lt;/<span class="name">version</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">dependency</span>&gt;</span></span><br></pre></td></tr></table></figure>
-
-<h2 id="3-3-代码实现"><a href="#3-3-代码实现" class="headerlink" title="3.3 代码实现"></a>3.3 代码实现</h2><a id="more"></a>
-
-<p><code>step1</code>：首先在SpringBoot配置类中添加注解@EnableAspectJAutoProxy，如下：</p>
-<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="meta">@EnableAspectJAutoProxy</span></span><br><span class="line"><span class="meta">@SpringBootApplication</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Application</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">        SpringApplication.run(Application<span class="class">.<span class="keyword">class</span>, <span class="title">args</span>)</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p><code>step2</code>：新建AspectjAop class，使用@Aspect标记为切面，注册到Spring容器中</p>
-<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="meta">@Slf</span>4j</span><br><span class="line"><span class="meta">@Aspect</span></span><br><span class="line"><span class="meta">@Component</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">AspectjAop</span> </span>&#123;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p><code>step3</code>：新建方法controllerPointCut，添加Pointcut，切点时机为“execution”，匹配方法为controller报下所有public 方法。可以对请求进行信息安全过滤等等操作。</p>
-<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="meta">@Slf</span>4j</span><br><span class="line"><span class="meta">@Aspect</span></span><br><span class="line"><span class="meta">@Component</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">AspectjAop</span> </span>&#123;</span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 此路径表示controller下所有类中的public方法</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="meta">@Pointcut</span>(<span class="string">"execution(public * com..controller..*(..))"</span>)</span><br><span class="line">    <span class="function"><span class="keyword">private</span> <span class="keyword">void</span> <span class="title">controllerPointCut</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p><code>step4</code>：添加Advice，注入执行中切点实例ProceedingJoinPoint，ProceedingJoinPoint可以获取入参，控制执行等等操作。可以在执行方法前后进行方法增强，实现业务等。</p>
-<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="meta">@Slf</span>4j</span><br><span class="line"><span class="meta">@Aspect</span></span><br><span class="line"><span class="meta">@Component</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">AspectjAop</span> </span>&#123;</span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 此路径表示controller下所有类中的public方法</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="meta">@Pointcut</span>(<span class="string">"execution(public * com..controller..*(..))"</span>)</span><br><span class="line">    <span class="function"><span class="keyword">private</span> <span class="keyword">void</span> <span class="title">controllerPointCut</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Around</span>(value = <span class="string">"controllerPointCut()"</span>)</span><br><span class="line">    <span class="function"><span class="keyword">private</span> Object <span class="title">aroundAdvice</span><span class="params">(ProceedingJoinPoint proceedingJoinPoint)</span> </span>&#123;</span><br><span class="line">        <span class="comment">// <span class="doctag">TODO:</span> Pre-operation</span></span><br><span class="line">        log.info(<span class="string">"You can check the parameters."</span>);</span><br><span class="line">        Object obj = <span class="keyword">null</span>;</span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            obj = proceedingJoinPoint.proceed();</span><br><span class="line">        &#125; <span class="keyword">catch</span> (Throwable throwable) &#123;</span><br><span class="line">            log.error(<span class="string">"controller throwable"</span>);</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="comment">// TODO：Post-operation</span></span><br><span class="line">        log.info(<span class="string">"You can encapsulate the return value."</span>);</span><br><span class="line">        <span class="keyword">return</span> obj;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-]]></content>
-      <categories>
-        <category>Java</category>
-        <category>AOP</category>
-        <category>AspectJ</category>
-      </categories>
-      <tags>
-        <tag>Java</tag>
-        <tag>AOP</tag>
-        <tag>AspectJ</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>JAVA线程池</title>
-    <url>/2020/07/02/JAVA%E7%BA%BF%E7%A8%8B%E6%B1%A0/</url>
-    <content><![CDATA[<blockquote>
-<p><strong>本文的出现是为了能够分享个人所学的相关知识，检验自身学习成果。内容会和其他技术存在部分关联，如有任何描述错误或者说明有误的地方，还望各位大佬指出。</strong> </p>
-</blockquote>
-<h1 id="1-了解线程池"><a href="#1-了解线程池" class="headerlink" title="1.  了解线程池"></a>1.  了解线程池</h1><p>线程池简单理解就是一次创建多个线程，当一个任务交由线程池执行时，由线程池交由管理的线程来执行任务。</p>
-<h1 id="2-线程池的优点"><a href="#2-线程池的优点" class="headerlink" title="2. 线程池的优点"></a>2. 线程池的优点</h1><p>（1）不需要主动创建线程，线程的创建和销毁均由线程池管理，减少了不必要的消耗。</p>
-<p>（2）提高响应速度，需要线程直接使用，省去了创建时的时间消耗。</p>
-<p>（3）更方便于并发管理。</p>
-<h1 id="3-JDK中线程池类"><a href="#3-JDK中线程池类" class="headerlink" title="3. JDK中线程池类"></a>3. JDK中线程池类</h1><p>说到线程池就需要去了解 Executors ，它是线程池的工厂类，里面对应了四种应用场景的线程池。</p>
-<a id="more"></a>
-
-<h2 id="3-1-newFixedThreadPool"><a href="#3-1-newFixedThreadPool" class="headerlink" title="3.1 newFixedThreadPool"></a>3.1 newFixedThreadPool</h2><p>创建一个线程池，该线程池重用在共享的无边界队列上运行的固定数量的线程。</p>
-<p><code>关键字</code>  固定线程数、无边界阻塞队列</p>
-<figure class="highlight java"><table><tr><td class="code"><pre><span class="line">Executor threadPool = Executors.newFixedThreadPool(<span class="number">3</span>);</span><br><span class="line"><span class="comment">// 调用</span></span><br><span class="line">fixedPool.execute(()-&gt; log.info(<span class="string">"run with fixedPool"</span>));</span><br></pre></td></tr></table></figure>
-
-<h2 id="3-2-newSingleThreadExecutor"><a href="#3-2-newSingleThreadExecutor" class="headerlink" title="3.2  newSingleThreadExecutor"></a>3.2  newSingleThreadExecutor</h2><p>创建一个执行程序，该执行程序使用在不受限制的队列上操作的单个工作线程。</p>
-<p><code>关键字</code>  单个线程、无边界阻塞队列</p>
-<figure class="highlight java"><table><tr><td class="code"><pre><span class="line">Executor singlePool = Executors.newSingleThreadExecutor();</span><br><span class="line"><span class="comment">// 调用</span></span><br><span class="line">singlePool.execute(() -&gt; log.info(<span class="string">"run with singlePool"</span>));</span><br></pre></td></tr></table></figure>
-
-<h2 id="3-3-newCachedThreadPool"><a href="#3-3-newCachedThreadPool" class="headerlink" title="3.3 newCachedThreadPool"></a>3.3 newCachedThreadPool</h2><p>创建一个线程池，该线程池根据需要创建新线程，但是将在先前构造的线程可用时重用它们。通过过期时间进行回收。</p>
-<p><code>关键字</code>  缓存、延迟销毁</p>
-<figure class="highlight java"><table><tr><td class="code"><pre><span class="line">Executor cachedPool = Executors.newCachedThreadPool();</span><br><span class="line"><span class="comment">// 调用</span></span><br><span class="line">cachedPool.execute(() -&gt; log.info(<span class="string">"run with cachedPool"</span>));</span><br></pre></td></tr></table></figure>
-
-<h2 id="3-4-newScheduledThreadPool"><a href="#3-4-newScheduledThreadPool" class="headerlink" title="3.4 newScheduledThreadPool"></a>3.4 newScheduledThreadPool</h2><p>创建一个线程池，该线程池可以安排命令在给定的延迟后运行或定期执行。</p>
-<p><code>关键字</code>  延迟执行、延迟队列</p>
-<figure class="highlight java"><table><tr><td class="code"><pre><span class="line">Executor scheduledPool = Executors.newScheduledThreadPool(<span class="number">2</span>);</span><br><span class="line"><span class="comment">// 调用</span></span><br><span class="line">scheduledPool.execute(() -&gt; log.info(<span class="string">"run with scheduledPool"</span>));</span><br></pre></td></tr></table></figure>
-
-<h1 id="4-自定义线程池"><a href="#4-自定义线程池" class="headerlink" title="4. 自定义线程池"></a>4. 自定义线程池</h1><p>如果好奇进去看过JDK定义的四种线程池，我们可以发现都是新建的ThreadPoolExecutor类，通过不同的参数实现不同的场景。</p>
-<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="title">ThreadPoolExecutor</span><span class="params">(<span class="keyword">int</span> corePoolSize, <span class="keyword">int</span> maximumPoolSize, <span class="keyword">long</span> keepAliveTime, TimeUnit unit,</span></span></span><br><span class="line"><span class="function"><span class="params">                             BlockingQueue&lt;Runnable&gt; workQueue,  ThreadFactory threadFactory, </span></span></span><br><span class="line"><span class="function"><span class="params">                          RejectedExecutionHandler handler)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">this</span>(corePoolSize, maximumPoolSize, keepAliveTime, unit, workQueue,</span><br><span class="line">                Executors.defaultThreadFactory(), handler);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<table>
-<thead>
-<tr>
-<th align="left">参数</th>
-<th>含义</th>
-<th>作用</th>
-</tr>
-</thead>
-<tbody><tr>
-<td align="left">corePoolSize</td>
-<td>线程池核心线程数</td>
-<td>corePoolSize –保留在池中的线程数（即使它们处于空闲状态），除非设置了allowCoreThreadTimeOut</td>
-</tr>
-<tr>
-<td align="left">maximumPoolSize</td>
-<td>线程池最大线程数</td>
-<td>池中允许的最大线程数</td>
-</tr>
-<tr>
-<td align="left">keepAliveTime</td>
-<td>线程存活时间</td>
-<td>当线程数大于内核数时，这是多余的空闲线程将在终止之前等待新任务的最长时间。</td>
-</tr>
-<tr>
-<td align="left">unit</td>
-<td>线程存活时间单位</td>
-<td>keepAliveTime参数的时间单位</td>
-</tr>
-<tr>
-<td align="left">workQueue</td>
-<td>阻塞队列</td>
-<td>用于在执行任务之前保留任务的队列。 此队列将仅保存execute方法提交的Runnable任务。</td>
-</tr>
-<tr>
-<td align="left">threadFactory</td>
-<td>线程工厂</td>
-<td>根据需要创建新线程的对象。</td>
-</tr>
-<tr>
-<td align="left">handler</td>
-<td>线程池拒绝（饱和）策略</td>
-<td>不能由ThreadPoolExecutor执行的任务的处理程序。默认使用AbortPolicy，及抛出异常。</td>
-</tr>
-</tbody></table>
-<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> lombok.extern.slf4j.Slf4j;</span><br><span class="line"><span class="keyword">import</span> org.junit.jupiter.api.Test;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> java.util.concurrent.Executors;</span><br><span class="line"><span class="keyword">import</span> java.util.concurrent.LinkedBlockingQueue;</span><br><span class="line"><span class="keyword">import</span> java.util.concurrent.ThreadPoolExecutor;</span><br><span class="line"><span class="keyword">import</span> java.util.concurrent.TimeUnit;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="meta">@Slf</span>4j</span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">MyThreadPool</span> </span>&#123;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> ThreadPoolExecutor pool = <span class="keyword">new</span> ThreadPoolExecutor(<span class="number">2</span>, <span class="number">8</span>, <span class="number">0</span></span><br><span class="line">            , TimeUnit.MILLISECONDS, <span class="keyword">new</span> LinkedBlockingQueue&lt;&gt;(<span class="number">8</span>), Executors.defaultThreadFactory(),</span><br><span class="line">            <span class="keyword">new</span> ThreadPoolExecutor.AbortPolicy());</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Test</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">testPool</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; <span class="number">10</span>; i++) &#123;</span><br><span class="line">            <span class="keyword">int</span> finalI = i;</span><br><span class="line">            pool.execute(() -&gt; &#123;</span><br><span class="line">                log.info(String.valueOf(finalI));</span><br><span class="line">            &#125;);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>日志输出如下</p>
-<img style="margin:auto 0;" src="/2020/07/02/JAVA%E7%BA%BF%E7%A8%8B%E6%B1%A0/JAVA线程池-1.png" alt="JAVA线程池-1.png">
-
-<br>
-
-]]></content>
-      <categories>
-        <category>Java</category>
-        <category>线程池</category>
-      </categories>
-      <tags>
-        <tag>Java</tag>
-        <tag>线程池</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>MinIO</title>
     <url>/2020/06/29/Minio/</url>
     <content><![CDATA[<blockquote>
@@ -247,73 +83,32 @@
       </tags>
   </entry>
   <entry>
-    <title>关于我</title>
-    <url>/2020/05/25/About/</url>
-    <content><![CDATA[<p>🌱  I’m currently learning</p>
-<p>Email：<a href="mailto:18861453337@163.com">18861453337@163.com</a></p>
-]]></content>
-  </entry>
-  <entry>
-    <title>Nginx-LoadBalance</title>
-    <url>/2020/06/28/Nginx-LoadBalance/</url>
+    <title>ArrayList扩容机制</title>
+    <url>/2020/05/26/ArrayList%E6%89%A9%E5%AE%B9%E6%9C%BA%E5%88%B6/</url>
     <content><![CDATA[<blockquote>
 <p><strong>本文的出现是为了能够分享个人所学的相关知识，检验自身学习成果。内容会和其他技术存在部分关联，如有任何描述错误或者说明有误的地方，还望各位大佬指出。</strong> </p>
 </blockquote>
-<h1 id="1-了解Nginx"><a href="#1-了解Nginx" class="headerlink" title="1. 了解Nginx"></a>1. 了解Nginx</h1><p>Nginx，高性能的HTTP和反向代理服务器。反向代理作为它的核心功能，它的优点包括隐藏真实服务器、服务聚合等。</p>
-<h1 id="2-环境"><a href="#2-环境" class="headerlink" title="2. 环境"></a>2. 环境</h1><p>Nginx： nginx version: nginx/1.17.6    </p>
-<p>Gcc：built by gcc 4.8.5 20150623 (Red Hat 4.8.5-39) (GCC)</p>
-<h1 id="3-详解"><a href="#3-详解" class="headerlink" title="3.详解"></a>3.详解</h1><p>Nginx的安装的总结会放在后续blog更新，此处不做过多的赘述。</p>
-<h5 id="step1：准备一个nginx环境"><a href="#step1：准备一个nginx环境" class="headerlink" title="step1：准备一个nginx环境."></a><code>step1</code>：准备一个nginx环境.</h5><h5 id="step2：找到nginx配置文件路径，编辑nginx-conf"><a href="#step2：找到nginx配置文件路径，编辑nginx-conf" class="headerlink" title="step2：找到nginx配置文件路径，编辑nginx.conf"></a><code>step2</code>：找到nginx配置文件路径，编辑nginx.conf</h5><h5 id="step3：nginx-conf中的http中添加-upstream，如下"><a href="#step3：nginx-conf中的http中添加-upstream，如下" class="headerlink" title="step3：nginx.conf中的http中添加 upstream，如下"></a><code>step3</code>：nginx.conf中的http中添加 upstream，如下</h5><a id="more"></a>
-
-<figure class="highlight nginx"><table><tr><td class="code"><pre><span class="line"><span class="attribute">upstream</span> servername &#123;</span><br><span class="line">    <span class="comment">#1、轮询（默认选项，所有weight=1）</span></span><br><span class="line">    <span class="comment">#2、weight，执行轮询几率，weight与访问几率成正比</span></span><br><span class="line">    <span class="comment">#3、ip_hash，每个请求按照hash结果分配，这样其实是每个服务都有一个固定的值</span></span><br><span class="line">    <span class="comment">#4、least_conn，最少连接数负载均衡</span></span><br><span class="line">    <span class="attribute">server</span> <span class="variable">$&#123;IP1&#125;</span>:<span class="variable">$&#123;PORT1&#125;</span>;</span><br><span class="line">    <span class="attribute">server</span> <span class="variable">$&#123;IP2&#125;</span>:<span class="variable">$&#123;PORT2&#125;</span>;</span><br><span class="line">    <span class="attribute">server</span> <span class="variable">$&#123;IP3&#125;</span>:<span class="variable">$&#123;PORT3&#125;</span>;</span><br><span class="line">    <span class="attribute">server</span> <span class="variable">$&#123;IP4&#125;</span>:<span class="variable">$&#123;PORT4&#125;</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<h5 id="step4：nginx-conf中的server中添加-location"><a href="#step4：nginx-conf中的server中添加-location" class="headerlink" title="step4：nginx.conf中的server中添加 location"></a><code>step4</code>：nginx.conf中的server中添加 location</h5><p>在server中listen 为对外暴露的nginx端口。</p>
-<p>location中的proxy_pass 指向step3中添加的upstream</p>
-<figure class="highlight nginx"><table><tr><td class="code"><pre><span class="line"><span class="attribute">location</span> /minio &#123;</span><br><span class="line">    <span class="attribute">proxy_set_header</span> Host <span class="variable">$http_host</span>;</span><br><span class="line">    <span class="attribute">proxy_pass</span> http://servername;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<h5 id="step5：最终效果如下"><a href="#step5：最终效果如下" class="headerlink" title="step5：最终效果如下"></a><code>step5</code>：最终效果如下</h5><figure class="highlight nginx"><table><tr><td class="code"><pre><span class="line"></span><br><span class="line"><span class="comment">#user  nobody;</span></span><br><span class="line"><span class="attribute">worker_processes</span>  <span class="number">1</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">#error_log  logs/error.log;</span></span><br><span class="line"><span class="comment">#error_log  logs/error.log  notice;</span></span><br><span class="line"><span class="comment">#error_log  logs/error.log  info;</span></span><br><span class="line"></span><br><span class="line"><span class="comment">#pid        logs/nginx.pid;</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="section">events</span> &#123;</span><br><span class="line">    <span class="attribute">worker_connections</span>  <span class="number">1024</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="section">http</span> &#123;</span><br><span class="line">    <span class="attribute">include</span>       mime.types;</span><br><span class="line">    <span class="attribute">default_type</span>  application/octet-stream;</span><br><span class="line"></span><br><span class="line">    <span class="comment">#log_format  main  '$remote_addr - $remote_user [$time_local] "$request" '</span></span><br><span class="line">    <span class="comment">#                  '$status $body_bytes_sent "$http_referer" '</span></span><br><span class="line">    <span class="comment">#                  '"$http_user_agent" "$http_x_forwarded_for"';</span></span><br><span class="line"></span><br><span class="line">    <span class="comment">#access_log  logs/access.log  main;</span></span><br><span class="line">    <span class="attribute">upstream</span> servername &#123;</span><br><span class="line">        <span class="comment">#1、轮询（默认选项，所有weight=1）</span></span><br><span class="line">        <span class="comment">#2、weight，执行轮询几率，weight与访问几率成正比</span></span><br><span class="line">        <span class="comment">#3、ip_hash，每个请求按照hash结果分配，这样其实是每个服务都有一个固定的值</span></span><br><span class="line">        <span class="comment">#4、least_conn，最少连接数负载均衡</span></span><br><span class="line">        <span class="attribute">server</span> <span class="variable">$&#123;IP1&#125;</span>:<span class="variable">$&#123;PORT1&#125;</span>;</span><br><span class="line">        <span class="attribute">server</span> <span class="variable">$&#123;IP2&#125;</span>:<span class="variable">$&#123;PORT2&#125;</span>;</span><br><span class="line">        <span class="attribute">server</span> <span class="variable">$&#123;IP3&#125;</span>:<span class="variable">$&#123;PORT3&#125;</span>;</span><br><span class="line">        <span class="attribute">server</span> <span class="variable">$&#123;IP4&#125;</span>:<span class="variable">$&#123;PORT4&#125;</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="attribute">sendfile</span>        <span class="literal">on</span>;</span><br><span class="line">    <span class="comment">#tcp_nopush     on;</span></span><br><span class="line"></span><br><span class="line">    <span class="comment">#keepalive_timeout  0;</span></span><br><span class="line">    <span class="attribute">keepalive_timeout</span>  <span class="number">65</span>;</span><br><span class="line"></span><br><span class="line">    <span class="comment">#gzip  on;</span></span><br><span class="line"></span><br><span class="line">    <span class="comment">#include /usr/local/nginx/minio.conf    </span></span><br><span class="line"></span><br><span class="line">    <span class="section">server</span> &#123;</span><br><span class="line">        <span class="attribute">listen</span>       <span class="number">8089</span>;</span><br><span class="line"></span><br><span class="line">        <span class="comment">#charset koi8-r;</span></span><br><span class="line"></span><br><span class="line">        <span class="comment">#access_log  logs/host.access.log  main;</span></span><br><span class="line"></span><br><span class="line">        <span class="attribute">location</span> / &#123;</span><br><span class="line">            <span class="attribute">root</span>   html;</span><br><span class="line">            <span class="attribute">index</span>  index.html index.htm;</span><br><span class="line">		&#125;</span><br><span class="line"></span><br><span class="line">		<span class="attribute">location</span> /minio &#123;</span><br><span class="line">			<span class="attribute">proxy_set_header</span> Host <span class="variable">$http_host</span>;</span><br><span class="line">			<span class="attribute">proxy_pass</span> http://servername;</span><br><span class="line">		&#125;</span><br><span class="line"></span><br><span class="line">        <span class="comment">#error_page  404              /404.html;</span></span><br><span class="line"></span><br><span class="line">        <span class="comment"># redirect server error pages to the static page /50x.html</span></span><br><span class="line">        <span class="comment">#</span></span><br><span class="line">        <span class="attribute">error_page</span>   <span class="number">500</span> <span class="number">502</span> <span class="number">503</span> <span class="number">504</span>  /50x.html;</span><br><span class="line">        <span class="attribute">location</span> = /50x.html &#123;</span><br><span class="line">            <span class="attribute">root</span>   html;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-]]></content>
-      <categories>
-        <category>Nginx</category>
-        <category>LoadBalance</category>
-      </categories>
-      <tags>
-        <tag>Nginx</tag>
-        <tag>LoadBalance</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>SPI机制</title>
-    <url>/2020/07/01/SPI%E6%9C%BA%E5%88%B6/</url>
-    <content><![CDATA[<p><strong>本blog的出现是为了能够分享个人所学的相关知识，检验自身学习成果。内容会和其他技术存在部分关联，如有任何描述错误或者说明有误的地方，还望各位大佬指出。</strong></p>
-<h1 id="1-什么是SPI"><a href="#1-什么是SPI" class="headerlink" title="1. 什么是SPI"></a>1. 什么是SPI</h1><h2 id="1-1-SPI思想"><a href="#1-1-SPI思想" class="headerlink" title="1.1 SPI思想"></a>1.1 SPI思想</h2><p>SPI的全名为Service Provider Interface.这个是针对厂商或者插件的。</p>
-<h2 id="1-2-SPI约定"><a href="#1-2-SPI约定" class="headerlink" title="1.2 SPI约定"></a>1.2 SPI约定</h2><h3 id="1-2-1-Java"><a href="#1-2-1-Java" class="headerlink" title="1.2.1 Java"></a>1.2.1 Java</h3><p>当服务的提供者，提供了服务接口的一种实现之后，在jar包的META-INF/services/目录里创建一个以服务接口命名的文件。</p>
-<h3 id="1-2-2-Spring"><a href="#1-2-2-Spring" class="headerlink" title="1.2.2 Spring"></a>1.2.2 Spring</h3><p>在jar包的META-INF/目录里创建一个spring.factories，所有spi对应关系都可以写在这个文件中。</p>
-<h1 id="2-Spring中的SPI"><a href="#2-Spring中的SPI" class="headerlink" title="2. Spring中的SPI"></a>2. Spring中的SPI</h1><blockquote>
-<p>本文介绍下spring的SPI</p>
-</blockquote>
-<h2 id="2-1-定义一个接口"><a href="#2-1-定义一个接口" class="headerlink" title="2.1 定义一个接口"></a>2.1 定义一个接口</h2><figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> org.springframework.context.ApplicationContext;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">interface</span> <span class="title">InitServiceInterFace</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">void</span> <span class="title">init</span><span class="params">(<span class="keyword">final</span> ApplicationContext context)</span></span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
+<h1 id="1-背景"><a href="#1-背景" class="headerlink" title="1. 背景"></a>1. 背景</h1><p>面试的时候问到过ArrayList的扩容机制以及HashMap的扩容机制，今天来讲讲ArrayList的扩容机制。</p>
+<h1 id="2-环境"><a href="#2-环境" class="headerlink" title="2. 环境"></a>2. 环境</h1><p>JDK1.8</p>
+<h1 id="3-详解"><a href="#3-详解" class="headerlink" title="3.详解"></a>3.详解</h1><h3 id="3-1-默认容量"><a href="#3-1-默认容量" class="headerlink" title="3.1 默认容量"></a>3.1 默认容量</h3><p> ArrayList若未指定长度默认空间长度为10，可见ArrayList中<strong>“DEFAULT_CAPACITY”</strong>属性，<strong>“size”</strong>属性为元素个数。最大长度为2^31-1-8，见ArrayList中<strong>“MAX_ARRAY_SIZE”</strong>属性。</p>
+<h3 id="3-2-扩容"><a href="#3-2-扩容" class="headerlink" title="3.2 扩容"></a>3.2 扩容</h3><p> 触发扩容的对外方法都在ArrayList.add<em>()的几个方法中，发现长度大于空间长度时调用*</em>“grow()”**,源码如下；</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">add</span><span class="params">(<span class="keyword">int</span> index, E element)</span> </span>&#123;</span><br><span class="line">    rangeCheckForAdd(index);</span><br><span class="line"></span><br><span class="line">    ensureCapacityInternal(size + <span class="number">1</span>);  <span class="comment">// Increments modCount!!</span></span><br><span class="line">    System.arraycopy(elementData, index, elementData, index + <span class="number">1</span>,</span><br><span class="line">                     size - index);</span><br><span class="line">    elementData[index] = element;</span><br><span class="line">    size++;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">private</span> <span class="keyword">void</span> <span class="title">ensureExplicitCapacity</span><span class="params">(<span class="keyword">int</span> minCapacity)</span> </span>&#123;</span><br><span class="line">    modCount++;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (minCapacity - elementData.length &gt; <span class="number">0</span>)</span><br><span class="line">        grow(minCapacity);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 <a id="more"></a>
 
-<h2 id="2-2-编写一个接口的实现类"><a href="#2-2-编写一个接口的实现类" class="headerlink" title="2.2 编写一个接口的实现类"></a>2.2 编写一个接口的实现类</h2><figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> com.windh.springspi.interfaces.InitServiceInterFace;</span><br><span class="line"><span class="keyword">import</span> lombok.extern.slf4j.Slf4j;</span><br><span class="line"><span class="keyword">import</span> org.springframework.context.ApplicationContext;</span><br><span class="line"></span><br><span class="line"><span class="meta">@Slf</span>4j</span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">LogInit</span> <span class="keyword">implements</span> <span class="title">InitServiceInterFace</span> </span>&#123;</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">init</span><span class="params">(ApplicationContext context)</span> </span>&#123;</span><br><span class="line">        <span class="comment">// TODO init LogInit</span></span><br><span class="line">        log.info(<span class="string">"Init My Log."</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>扩容主要操作是在代码就在grow()方法中，源码及解析如下：</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">private</span> <span class="keyword">void</span> <span class="title">grow</span><span class="params">(<span class="keyword">int</span> minCapacity)</span> </span>&#123;</span><br><span class="line">   	<span class="comment">// oldCapacity为旧容量，newCapacity为新容量</span></span><br><span class="line">    <span class="keyword">int</span> oldCapacity = elementData.length;</span><br><span class="line">    <span class="comment">// 将oldCapacity 右移一位，其效果相当于oldCapacity /2，</span></span><br><span class="line">    <span class="comment">// 我们知道位运算的速度远远快于整除运算，整句运算式的结果就是将新容量更新为旧容量的1.5倍，</span></span><br><span class="line">    <span class="keyword">int</span> newCapacity = oldCapacity + (oldCapacity &gt;&gt; <span class="number">1</span>);</span><br><span class="line">    <span class="comment">// 检查新计算出的容量数值和实际所需容量数值比较，若计算出的容量数值小于实际所需容量数值，则用实际容量的数值</span></span><br><span class="line">    <span class="keyword">if</span> (newCapacity - minCapacity &lt; <span class="number">0</span>)</span><br><span class="line">        newCapacity = minCapacity;</span><br><span class="line">    <span class="comment">// 检查新计算出的容量数值是否超过ArrayList最大长度，如果minCapacity大于最大容量，新容量为`Integer.MAX_VALUE`，否则，新容量大小则为 MAX_ARRAY_SIZE 即为 `Integer.MAX_VALUE - 8`</span></span><br><span class="line">    <span class="keyword">if</span> (newCapacity - MAX_ARRAY_SIZE &gt; <span class="number">0</span>)</span><br><span class="line">        newCapacity = hugeCapacity(minCapacity);</span><br><span class="line">    <span class="comment">// 调用copy方法</span></span><br><span class="line">    elementData = Arrays.copyOf(elementData, newCapacity);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">int</span> <span class="title">hugeCapacity</span><span class="params">(<span class="keyword">int</span> minCapacity)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">if</span> (minCapacity &lt; <span class="number">0</span>) <span class="comment">// overflow</span></span><br><span class="line">        <span class="keyword">throw</span> <span class="keyword">new</span> OutOfMemoryError();</span><br><span class="line">    <span class="keyword">return</span> (minCapacity &gt; MAX_ARRAY_SIZE) ?</span><br><span class="line">        <span class="comment">// MAX_ARRAY_SIZE = Integer.MAX_VALUE-8</span></span><br><span class="line">        Integer.MAX_VALUE :</span><br><span class="line">    MAX_ARRAY_SIZE;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
-<h2 id="2-3-新建spi所需静态文件"><a href="#2-3-新建spi所需静态文件" class="headerlink" title="2.3 新建spi所需静态文件"></a>2.3 新建spi所需静态文件</h2><blockquote>
-<p>在Resources静态资源目录下新建spring.factories文件；写入如下内容：</p>
-</blockquote>
-<figure class="highlight properties"><table><tr><td class="code"><pre><span class="line"><span class="meta">com.windh.springspi.interfaces.InitServiceInterFace</span>=<span class="string">\</span></span><br><span class="line">  <span class="attr">com.windh.springspi.impl.LogInit</span></span><br></pre></td></tr></table></figure>
-
-<h2 id="2-4-测试"><a href="#2-4-测试" class="headerlink" title="2.4 测试"></a>2.4 测试</h2><figure class="highlight java"><table><tr><td class="code"><pre><span class="line"></span><br><span class="line"><span class="keyword">import</span> com.windh.springspi.interfaces.InitServiceInterFace;</span><br><span class="line"><span class="keyword">import</span> lombok.extern.slf4j.Slf4j;</span><br><span class="line"><span class="keyword">import</span> org.springframework.boot.SpringApplication;</span><br><span class="line"><span class="keyword">import</span> org.springframework.boot.autoconfigure.SpringBootApplication;</span><br><span class="line"><span class="keyword">import</span> org.springframework.context.ConfigurableApplicationContext;</span><br><span class="line"><span class="keyword">import</span> org.springframework.core.io.support.SpringFactoriesLoader;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> java.util.List;</span><br><span class="line"></span><br><span class="line"><span class="meta">@Slf</span>4j</span><br><span class="line"><span class="meta">@SpringBootApplication</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">SpringspiApplication</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">        ConfigurableApplicationContext run = SpringApplication.run(SpringspiApplication<span class="class">.<span class="keyword">class</span>, <span class="title">args</span>)</span>;</span><br><span class="line">        List&lt;InitServiceInterFace&gt; serviceLoader = SpringFactoriesLoader.loadFactories(</span><br><span class="line">                InitServiceInterFace<span class="class">.<span class="keyword">class</span>, <span class="title">Thread</span>.<span class="title">currentThread</span>().<span class="title">getContextClassLoader</span>())</span>;</span><br><span class="line">        <span class="keyword">for</span> (InitServiceInterFace initServiceInterFace : serviceLoader) &#123;</span><br><span class="line">            initServiceInterFace.init(run);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>日志输入如下：</p>
-<img style="margin:auto 0;" src="/2020/07/01/SPI%E6%9C%BA%E5%88%B6/SPI-1.png" alt="SPI-1.png">]]></content>
+<p>ArrayList扩容机制如下：</p>
+<p>1.普遍情况下，新容量是旧容量1.5倍，同时校验新容量是否超过 MAX_ARRAY_SIZE（Integer.MAX_VALUE - 8）。</p>
+<p>2.当在扩容1.5倍后，校验新容量是否超过MAX_ARRAY_SIZE（Integer.MAX_VALUE - 8），若新容量（源码中newCapacity）大于最大容量 MAX_ARRAY_SIZE（Integer.MAX_VALUE - 8）时,新容量为Integer.MAX_VALUE，否则为 MAX_ARRAY_SIZE（Integer.MAX_VALUE - 8）;</p>
+]]></content>
       <categories>
-        <category>SPI</category>
+        <category>Java</category>
+        <category>ArrayList</category>
       </categories>
       <tags>
-        <tag>SpringBoot</tag>
-        <tag>SPI</tag>
+        <tag>Java</tag>
+        <tag>ArrayList</tag>
       </tags>
   </entry>
   <entry>
@@ -350,6 +145,78 @@
       </categories>
       <tags>
         <tag>Quartz</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>AOP实战-AspectJ</title>
+    <url>/2020/05/27/AOP%E5%AE%9E%E6%88%98-AspectJ/</url>
+    <content><![CDATA[<blockquote>
+<p><strong>本文的出现是为了能够分享个人所学的相关知识，检验自身学习成果。内容会和其他技术存在部分关联，如有任何描述错误或者说明有误的地方，还望各位大佬指出。</strong> </p>
+</blockquote>
+<h1 id="1-背景"><a href="#1-背景" class="headerlink" title="1. 背景"></a>1. 背景</h1><p>用过Spring的都知道DI和AOP，今天介绍一个实现AOP超级且方便功能强大的框架AspectJ。此文默认读者有一定spring基础。</p>
+<h1 id="2-环境"><a href="#2-环境" class="headerlink" title="2. 环境"></a>2. 环境</h1><blockquote>
+<p>JDK：1.8</p>
+<p>架构：SpringBoot</p>
+</blockquote>
+<h1 id="3-详解"><a href="#3-详解" class="headerlink" title="3. 详解"></a>3. 详解</h1><h2 id="3-1-基础概念"><a href="#3-1-基础概念" class="headerlink" title="3.1 基础概念"></a>3.1 基础概念</h2><p>Aspect：切面</p>
+<p>Pointcut：切点，通过不同切入点，执行不同操作，此文中展示execution时机执行的操作。</p>
+<p>Advice：通知，包括前置通知、后置通知、异常通知、环绕通知等等；其中，环绕通知功能最为强大。此文展示环绕通知用法。</p>
+<h2 id="3-2-AspectJ依赖："><a href="#3-2-AspectJ依赖：" class="headerlink" title="3.2 AspectJ依赖："></a>3.2 AspectJ依赖：</h2><figure class="highlight xml"><table><tr><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">dependency</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>org.aspectj<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>aspectjweaver<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">version</span>&gt;</span>1.9.5<span class="tag">&lt;/<span class="name">version</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">dependency</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<h2 id="3-3-代码实现"><a href="#3-3-代码实现" class="headerlink" title="3.3 代码实现"></a>3.3 代码实现</h2><a id="more"></a>
+
+<p><code>step1</code>：首先在SpringBoot配置类中添加注解@EnableAspectJAutoProxy，如下：</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="meta">@EnableAspectJAutoProxy</span></span><br><span class="line"><span class="meta">@SpringBootApplication</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Application</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">        SpringApplication.run(Application<span class="class">.<span class="keyword">class</span>, <span class="title">args</span>)</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><code>step2</code>：新建AspectjAop class，使用@Aspect标记为切面，注册到Spring容器中</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="meta">@Slf</span>4j</span><br><span class="line"><span class="meta">@Aspect</span></span><br><span class="line"><span class="meta">@Component</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">AspectjAop</span> </span>&#123;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><code>step3</code>：新建方法controllerPointCut，添加Pointcut，切点时机为“execution”，匹配方法为controller报下所有public 方法。可以对请求进行信息安全过滤等等操作。</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="meta">@Slf</span>4j</span><br><span class="line"><span class="meta">@Aspect</span></span><br><span class="line"><span class="meta">@Component</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">AspectjAop</span> </span>&#123;</span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 此路径表示controller下所有类中的public方法</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="meta">@Pointcut</span>(<span class="string">"execution(public * com..controller..*(..))"</span>)</span><br><span class="line">    <span class="function"><span class="keyword">private</span> <span class="keyword">void</span> <span class="title">controllerPointCut</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><code>step4</code>：添加Advice，注入执行中切点实例ProceedingJoinPoint，ProceedingJoinPoint可以获取入参，控制执行等等操作。可以在执行方法前后进行方法增强，实现业务等。</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="meta">@Slf</span>4j</span><br><span class="line"><span class="meta">@Aspect</span></span><br><span class="line"><span class="meta">@Component</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">AspectjAop</span> </span>&#123;</span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 此路径表示controller下所有类中的public方法</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="meta">@Pointcut</span>(<span class="string">"execution(public * com..controller..*(..))"</span>)</span><br><span class="line">    <span class="function"><span class="keyword">private</span> <span class="keyword">void</span> <span class="title">controllerPointCut</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Around</span>(value = <span class="string">"controllerPointCut()"</span>)</span><br><span class="line">    <span class="function"><span class="keyword">private</span> Object <span class="title">aroundAdvice</span><span class="params">(ProceedingJoinPoint proceedingJoinPoint)</span> </span>&#123;</span><br><span class="line">        <span class="comment">// <span class="doctag">TODO:</span> Pre-operation</span></span><br><span class="line">        log.info(<span class="string">"You can check the parameters."</span>);</span><br><span class="line">        Object obj = <span class="keyword">null</span>;</span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            obj = proceedingJoinPoint.proceed();</span><br><span class="line">        &#125; <span class="keyword">catch</span> (Throwable throwable) &#123;</span><br><span class="line">            log.error(<span class="string">"controller throwable"</span>);</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="comment">// TODO：Post-operation</span></span><br><span class="line">        log.info(<span class="string">"You can encapsulate the return value."</span>);</span><br><span class="line">        <span class="keyword">return</span> obj;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+]]></content>
+      <categories>
+        <category>Java</category>
+        <category>AOP</category>
+        <category>AspectJ</category>
+      </categories>
+      <tags>
+        <tag>Java</tag>
+        <tag>AOP</tag>
+        <tag>AspectJ</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Nginx-LoadBalance</title>
+    <url>/2020/06/28/Nginx-LoadBalance/</url>
+    <content><![CDATA[<blockquote>
+<p><strong>本文的出现是为了能够分享个人所学的相关知识，检验自身学习成果。内容会和其他技术存在部分关联，如有任何描述错误或者说明有误的地方，还望各位大佬指出。</strong> </p>
+</blockquote>
+<h1 id="1-了解Nginx"><a href="#1-了解Nginx" class="headerlink" title="1. 了解Nginx"></a>1. 了解Nginx</h1><p>Nginx，高性能的HTTP和反向代理服务器。反向代理作为它的核心功能，它的优点包括隐藏真实服务器、服务聚合等。</p>
+<h1 id="2-环境"><a href="#2-环境" class="headerlink" title="2. 环境"></a>2. 环境</h1><p>Nginx： nginx version: nginx/1.17.6    </p>
+<p>Gcc：built by gcc 4.8.5 20150623 (Red Hat 4.8.5-39) (GCC)</p>
+<h1 id="3-详解"><a href="#3-详解" class="headerlink" title="3.详解"></a>3.详解</h1><p>Nginx的安装的总结会放在后续blog更新，此处不做过多的赘述。</p>
+<h5 id="step1：准备一个nginx环境"><a href="#step1：准备一个nginx环境" class="headerlink" title="step1：准备一个nginx环境."></a><code>step1</code>：准备一个nginx环境.</h5><h5 id="step2：找到nginx配置文件路径，编辑nginx-conf"><a href="#step2：找到nginx配置文件路径，编辑nginx-conf" class="headerlink" title="step2：找到nginx配置文件路径，编辑nginx.conf"></a><code>step2</code>：找到nginx配置文件路径，编辑nginx.conf</h5><h5 id="step3：nginx-conf中的http中添加-upstream，如下"><a href="#step3：nginx-conf中的http中添加-upstream，如下" class="headerlink" title="step3：nginx.conf中的http中添加 upstream，如下"></a><code>step3</code>：nginx.conf中的http中添加 upstream，如下</h5><a id="more"></a>
+
+<figure class="highlight nginx"><table><tr><td class="code"><pre><span class="line"><span class="attribute">upstream</span> servername &#123;</span><br><span class="line">    <span class="comment">#1、轮询（默认选项，所有weight=1）</span></span><br><span class="line">    <span class="comment">#2、weight，执行轮询几率，weight与访问几率成正比</span></span><br><span class="line">    <span class="comment">#3、ip_hash，每个请求按照hash结果分配，这样其实是每个服务都有一个固定的值</span></span><br><span class="line">    <span class="comment">#4、least_conn，最少连接数负载均衡</span></span><br><span class="line">    <span class="attribute">server</span> <span class="variable">$&#123;IP1&#125;</span>:<span class="variable">$&#123;PORT1&#125;</span>;</span><br><span class="line">    <span class="attribute">server</span> <span class="variable">$&#123;IP2&#125;</span>:<span class="variable">$&#123;PORT2&#125;</span>;</span><br><span class="line">    <span class="attribute">server</span> <span class="variable">$&#123;IP3&#125;</span>:<span class="variable">$&#123;PORT3&#125;</span>;</span><br><span class="line">    <span class="attribute">server</span> <span class="variable">$&#123;IP4&#125;</span>:<span class="variable">$&#123;PORT4&#125;</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h5 id="step4：nginx-conf中的server中添加-location"><a href="#step4：nginx-conf中的server中添加-location" class="headerlink" title="step4：nginx.conf中的server中添加 location"></a><code>step4</code>：nginx.conf中的server中添加 location</h5><p>在server中listen 为对外暴露的nginx端口。</p>
+<p>location中的proxy_pass 指向step3中添加的upstream</p>
+<figure class="highlight nginx"><table><tr><td class="code"><pre><span class="line"><span class="attribute">location</span> /minio &#123;</span><br><span class="line">    <span class="attribute">proxy_set_header</span> Host <span class="variable">$http_host</span>;</span><br><span class="line">    <span class="attribute">proxy_pass</span> http://servername;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h5 id="step5：最终效果如下"><a href="#step5：最终效果如下" class="headerlink" title="step5：最终效果如下"></a><code>step5</code>：最终效果如下</h5><figure class="highlight nginx"><table><tr><td class="code"><pre><span class="line"></span><br><span class="line"><span class="comment">#user  nobody;</span></span><br><span class="line"><span class="attribute">worker_processes</span>  <span class="number">1</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">#error_log  logs/error.log;</span></span><br><span class="line"><span class="comment">#error_log  logs/error.log  notice;</span></span><br><span class="line"><span class="comment">#error_log  logs/error.log  info;</span></span><br><span class="line"></span><br><span class="line"><span class="comment">#pid        logs/nginx.pid;</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="section">events</span> &#123;</span><br><span class="line">    <span class="attribute">worker_connections</span>  <span class="number">1024</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="section">http</span> &#123;</span><br><span class="line">    <span class="attribute">include</span>       mime.types;</span><br><span class="line">    <span class="attribute">default_type</span>  application/octet-stream;</span><br><span class="line"></span><br><span class="line">    <span class="comment">#log_format  main  '$remote_addr - $remote_user [$time_local] "$request" '</span></span><br><span class="line">    <span class="comment">#                  '$status $body_bytes_sent "$http_referer" '</span></span><br><span class="line">    <span class="comment">#                  '"$http_user_agent" "$http_x_forwarded_for"';</span></span><br><span class="line"></span><br><span class="line">    <span class="comment">#access_log  logs/access.log  main;</span></span><br><span class="line">    <span class="attribute">upstream</span> servername &#123;</span><br><span class="line">        <span class="comment">#1、轮询（默认选项，所有weight=1）</span></span><br><span class="line">        <span class="comment">#2、weight，执行轮询几率，weight与访问几率成正比</span></span><br><span class="line">        <span class="comment">#3、ip_hash，每个请求按照hash结果分配，这样其实是每个服务都有一个固定的值</span></span><br><span class="line">        <span class="comment">#4、least_conn，最少连接数负载均衡</span></span><br><span class="line">        <span class="attribute">server</span> <span class="variable">$&#123;IP1&#125;</span>:<span class="variable">$&#123;PORT1&#125;</span>;</span><br><span class="line">        <span class="attribute">server</span> <span class="variable">$&#123;IP2&#125;</span>:<span class="variable">$&#123;PORT2&#125;</span>;</span><br><span class="line">        <span class="attribute">server</span> <span class="variable">$&#123;IP3&#125;</span>:<span class="variable">$&#123;PORT3&#125;</span>;</span><br><span class="line">        <span class="attribute">server</span> <span class="variable">$&#123;IP4&#125;</span>:<span class="variable">$&#123;PORT4&#125;</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="attribute">sendfile</span>        <span class="literal">on</span>;</span><br><span class="line">    <span class="comment">#tcp_nopush     on;</span></span><br><span class="line"></span><br><span class="line">    <span class="comment">#keepalive_timeout  0;</span></span><br><span class="line">    <span class="attribute">keepalive_timeout</span>  <span class="number">65</span>;</span><br><span class="line"></span><br><span class="line">    <span class="comment">#gzip  on;</span></span><br><span class="line"></span><br><span class="line">    <span class="comment">#include /usr/local/nginx/minio.conf    </span></span><br><span class="line"></span><br><span class="line">    <span class="section">server</span> &#123;</span><br><span class="line">        <span class="attribute">listen</span>       <span class="number">8089</span>;</span><br><span class="line"></span><br><span class="line">        <span class="comment">#charset koi8-r;</span></span><br><span class="line"></span><br><span class="line">        <span class="comment">#access_log  logs/host.access.log  main;</span></span><br><span class="line"></span><br><span class="line">        <span class="attribute">location</span> / &#123;</span><br><span class="line">            <span class="attribute">root</span>   html;</span><br><span class="line">            <span class="attribute">index</span>  index.html index.htm;</span><br><span class="line">		&#125;</span><br><span class="line"></span><br><span class="line">		<span class="attribute">location</span> /minio &#123;</span><br><span class="line">			<span class="attribute">proxy_set_header</span> Host <span class="variable">$http_host</span>;</span><br><span class="line">			<span class="attribute">proxy_pass</span> http://servername;</span><br><span class="line">		&#125;</span><br><span class="line"></span><br><span class="line">        <span class="comment">#error_page  404              /404.html;</span></span><br><span class="line"></span><br><span class="line">        <span class="comment"># redirect server error pages to the static page /50x.html</span></span><br><span class="line">        <span class="comment">#</span></span><br><span class="line">        <span class="attribute">error_page</span>   <span class="number">500</span> <span class="number">502</span> <span class="number">503</span> <span class="number">504</span>  /50x.html;</span><br><span class="line">        <span class="attribute">location</span> = /50x.html &#123;</span><br><span class="line">            <span class="attribute">root</span>   html;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+]]></content>
+      <categories>
+        <category>Nginx</category>
+        <category>LoadBalance</category>
+      </categories>
+      <tags>
+        <tag>Nginx</tag>
+        <tag>LoadBalance</tag>
       </tags>
   </entry>
   <entry>
@@ -460,8 +327,8 @@
       </categories>
       <tags>
         <tag>Java</tag>
-        <tag>SpringBoot</tag>
         <tag>Mybatis</tag>
+        <tag>SpringBoot</tag>
       </tags>
   </entry>
   <entry>
@@ -519,6 +386,139 @@
         <tag>Java</tag>
         <tag>SpringBoot</tag>
         <tag>Spring</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>关于我</title>
+    <url>/2020/05/25/About/</url>
+    <content><![CDATA[<p>🌱  I’m currently learning</p>
+<p>Email：<a href="mailto:18861453337@163.com">18861453337@163.com</a></p>
+]]></content>
+  </entry>
+  <entry>
+    <title>JAVA线程池</title>
+    <url>/2020/07/02/JAVA%E7%BA%BF%E7%A8%8B%E6%B1%A0/</url>
+    <content><![CDATA[<blockquote>
+<p><strong>本文的出现是为了能够分享个人所学的相关知识，检验自身学习成果。内容会和其他技术存在部分关联，如有任何描述错误或者说明有误的地方，还望各位大佬指出。</strong> </p>
+</blockquote>
+<h1 id="1-了解线程池"><a href="#1-了解线程池" class="headerlink" title="1.  了解线程池"></a>1.  了解线程池</h1><p>线程池简单理解就是一次创建多个线程，当一个任务交由线程池执行时，由线程池交由管理的线程来执行任务。</p>
+<h1 id="2-线程池的优点"><a href="#2-线程池的优点" class="headerlink" title="2. 线程池的优点"></a>2. 线程池的优点</h1><p>（1）不需要主动创建线程，线程的创建和销毁均由线程池管理，减少了不必要的消耗。</p>
+<p>（2）提高响应速度，需要线程直接使用，省去了创建时的时间消耗。</p>
+<p>（3）更方便于并发管理。</p>
+<h1 id="3-JDK中线程池类"><a href="#3-JDK中线程池类" class="headerlink" title="3. JDK中线程池类"></a>3. JDK中线程池类</h1><p>说到线程池就需要去了解 Executors ，它是线程池的工厂类，里面对应了四种应用场景的线程池。</p>
+<a id="more"></a>
+
+<h2 id="3-1-newFixedThreadPool"><a href="#3-1-newFixedThreadPool" class="headerlink" title="3.1 newFixedThreadPool"></a>3.1 newFixedThreadPool</h2><p>创建一个线程池，该线程池重用在共享的无边界队列上运行的固定数量的线程。</p>
+<p><code>关键字</code>  固定线程数、无边界阻塞队列</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line">Executor threadPool = Executors.newFixedThreadPool(<span class="number">3</span>);</span><br><span class="line"><span class="comment">// 调用</span></span><br><span class="line">fixedPool.execute(()-&gt; log.info(<span class="string">"run with fixedPool"</span>));</span><br></pre></td></tr></table></figure>
+
+<h2 id="3-2-newSingleThreadExecutor"><a href="#3-2-newSingleThreadExecutor" class="headerlink" title="3.2  newSingleThreadExecutor"></a>3.2  newSingleThreadExecutor</h2><p>创建一个执行程序，该执行程序使用在不受限制的队列上操作的单个工作线程。</p>
+<p><code>关键字</code>  单个线程、无边界阻塞队列</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line">Executor singlePool = Executors.newSingleThreadExecutor();</span><br><span class="line"><span class="comment">// 调用</span></span><br><span class="line">singlePool.execute(() -&gt; log.info(<span class="string">"run with singlePool"</span>));</span><br></pre></td></tr></table></figure>
+
+<h2 id="3-3-newCachedThreadPool"><a href="#3-3-newCachedThreadPool" class="headerlink" title="3.3 newCachedThreadPool"></a>3.3 newCachedThreadPool</h2><p>创建一个线程池，该线程池根据需要创建新线程，但是将在先前构造的线程可用时重用它们。通过过期时间进行回收。</p>
+<p><code>关键字</code>  缓存、延迟销毁</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line">Executor cachedPool = Executors.newCachedThreadPool();</span><br><span class="line"><span class="comment">// 调用</span></span><br><span class="line">cachedPool.execute(() -&gt; log.info(<span class="string">"run with cachedPool"</span>));</span><br></pre></td></tr></table></figure>
+
+<h2 id="3-4-newScheduledThreadPool"><a href="#3-4-newScheduledThreadPool" class="headerlink" title="3.4 newScheduledThreadPool"></a>3.4 newScheduledThreadPool</h2><p>创建一个线程池，该线程池可以安排命令在给定的延迟后运行或定期执行。</p>
+<p><code>关键字</code>  延迟执行、延迟队列</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line">Executor scheduledPool = Executors.newScheduledThreadPool(<span class="number">2</span>);</span><br><span class="line"><span class="comment">// 调用</span></span><br><span class="line">scheduledPool.execute(() -&gt; log.info(<span class="string">"run with scheduledPool"</span>));</span><br></pre></td></tr></table></figure>
+
+<h1 id="4-自定义线程池"><a href="#4-自定义线程池" class="headerlink" title="4. 自定义线程池"></a>4. 自定义线程池</h1><p>如果好奇进去看过JDK定义的四种线程池，我们可以发现都是新建的ThreadPoolExecutor类，通过不同的参数实现不同的场景。</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="title">ThreadPoolExecutor</span><span class="params">(<span class="keyword">int</span> corePoolSize, <span class="keyword">int</span> maximumPoolSize, <span class="keyword">long</span> keepAliveTime, TimeUnit unit,</span></span></span><br><span class="line"><span class="function"><span class="params">                             BlockingQueue&lt;Runnable&gt; workQueue,  ThreadFactory threadFactory, </span></span></span><br><span class="line"><span class="function"><span class="params">                          RejectedExecutionHandler handler)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">this</span>(corePoolSize, maximumPoolSize, keepAliveTime, unit, workQueue,</span><br><span class="line">                Executors.defaultThreadFactory(), handler);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<table>
+<thead>
+<tr>
+<th align="left">参数</th>
+<th>含义</th>
+<th>作用</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left">corePoolSize</td>
+<td>线程池核心线程数</td>
+<td>corePoolSize –保留在池中的线程数（即使它们处于空闲状态），除非设置了allowCoreThreadTimeOut</td>
+</tr>
+<tr>
+<td align="left">maximumPoolSize</td>
+<td>线程池最大线程数</td>
+<td>池中允许的最大线程数</td>
+</tr>
+<tr>
+<td align="left">keepAliveTime</td>
+<td>线程存活时间</td>
+<td>当线程数大于内核数时，这是多余的空闲线程将在终止之前等待新任务的最长时间。</td>
+</tr>
+<tr>
+<td align="left">unit</td>
+<td>线程存活时间单位</td>
+<td>keepAliveTime参数的时间单位</td>
+</tr>
+<tr>
+<td align="left">workQueue</td>
+<td>阻塞队列</td>
+<td>用于在执行任务之前保留任务的队列。 此队列将仅保存execute方法提交的Runnable任务。</td>
+</tr>
+<tr>
+<td align="left">threadFactory</td>
+<td>线程工厂</td>
+<td>根据需要创建新线程的对象。</td>
+</tr>
+<tr>
+<td align="left">handler</td>
+<td>线程池拒绝（饱和）策略</td>
+<td>不能由ThreadPoolExecutor执行的任务的处理程序。默认使用AbortPolicy，及抛出异常。</td>
+</tr>
+</tbody></table>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> lombok.extern.slf4j.Slf4j;</span><br><span class="line"><span class="keyword">import</span> org.junit.jupiter.api.Test;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> java.util.concurrent.Executors;</span><br><span class="line"><span class="keyword">import</span> java.util.concurrent.LinkedBlockingQueue;</span><br><span class="line"><span class="keyword">import</span> java.util.concurrent.ThreadPoolExecutor;</span><br><span class="line"><span class="keyword">import</span> java.util.concurrent.TimeUnit;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="meta">@Slf</span>4j</span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">MyThreadPool</span> </span>&#123;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> ThreadPoolExecutor pool = <span class="keyword">new</span> ThreadPoolExecutor(<span class="number">2</span>, <span class="number">8</span>, <span class="number">0</span></span><br><span class="line">            , TimeUnit.MILLISECONDS, <span class="keyword">new</span> LinkedBlockingQueue&lt;&gt;(<span class="number">8</span>), Executors.defaultThreadFactory(),</span><br><span class="line">            <span class="keyword">new</span> ThreadPoolExecutor.AbortPolicy());</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Test</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">testPool</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; <span class="number">10</span>; i++) &#123;</span><br><span class="line">            <span class="keyword">int</span> finalI = i;</span><br><span class="line">            pool.execute(() -&gt; &#123;</span><br><span class="line">                log.info(String.valueOf(finalI));</span><br><span class="line">            &#125;);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>日志输出如下</p>
+<img style="margin:auto 0;" src="/2020/07/02/JAVA%E7%BA%BF%E7%A8%8B%E6%B1%A0/JAVA线程池-1.png" alt="JAVA线程池-1.png">
+
+<br>
+
+]]></content>
+      <categories>
+        <category>Java</category>
+        <category>线程池</category>
+      </categories>
+      <tags>
+        <tag>Java</tag>
+        <tag>线程池</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>SPI机制</title>
+    <url>/2020/07/01/SPI%E6%9C%BA%E5%88%B6/</url>
+    <content><![CDATA[<p><strong>本blog的出现是为了能够分享个人所学的相关知识，检验自身学习成果。内容会和其他技术存在部分关联，如有任何描述错误或者说明有误的地方，还望各位大佬指出。</strong></p>
+<h1 id="1-什么是SPI"><a href="#1-什么是SPI" class="headerlink" title="1. 什么是SPI"></a>1. 什么是SPI</h1><h2 id="1-1-SPI思想"><a href="#1-1-SPI思想" class="headerlink" title="1.1 SPI思想"></a>1.1 SPI思想</h2><p>SPI的全名为Service Provider Interface.这个是针对厂商或者插件的。</p>
+<h2 id="1-2-SPI约定"><a href="#1-2-SPI约定" class="headerlink" title="1.2 SPI约定"></a>1.2 SPI约定</h2><h3 id="1-2-1-Java"><a href="#1-2-1-Java" class="headerlink" title="1.2.1 Java"></a>1.2.1 Java</h3><p>当服务的提供者，提供了服务接口的一种实现之后，在jar包的META-INF/services/目录里创建一个以服务接口命名的文件。</p>
+<h3 id="1-2-2-Spring"><a href="#1-2-2-Spring" class="headerlink" title="1.2.2 Spring"></a>1.2.2 Spring</h3><p>在jar包的META-INF/目录里创建一个spring.factories，所有spi对应关系都可以写在这个文件中。</p>
+<h1 id="2-Spring中的SPI"><a href="#2-Spring中的SPI" class="headerlink" title="2. Spring中的SPI"></a>2. Spring中的SPI</h1><blockquote>
+<p>本文介绍下spring的SPI</p>
+</blockquote>
+<h2 id="2-1-定义一个接口"><a href="#2-1-定义一个接口" class="headerlink" title="2.1 定义一个接口"></a>2.1 定义一个接口</h2><figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> org.springframework.context.ApplicationContext;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">interface</span> <span class="title">InitServiceInterFace</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">void</span> <span class="title">init</span><span class="params">(<span class="keyword">final</span> ApplicationContext context)</span></span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<a id="more"></a>
+
+<h2 id="2-2-编写一个接口的实现类"><a href="#2-2-编写一个接口的实现类" class="headerlink" title="2.2 编写一个接口的实现类"></a>2.2 编写一个接口的实现类</h2><figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> com.windh.springspi.interfaces.InitServiceInterFace;</span><br><span class="line"><span class="keyword">import</span> lombok.extern.slf4j.Slf4j;</span><br><span class="line"><span class="keyword">import</span> org.springframework.context.ApplicationContext;</span><br><span class="line"></span><br><span class="line"><span class="meta">@Slf</span>4j</span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">LogInit</span> <span class="keyword">implements</span> <span class="title">InitServiceInterFace</span> </span>&#123;</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">init</span><span class="params">(ApplicationContext context)</span> </span>&#123;</span><br><span class="line">        <span class="comment">// TODO init LogInit</span></span><br><span class="line">        log.info(<span class="string">"Init My Log."</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="2-3-新建spi所需静态文件"><a href="#2-3-新建spi所需静态文件" class="headerlink" title="2.3 新建spi所需静态文件"></a>2.3 新建spi所需静态文件</h2><blockquote>
+<p>在Resources静态资源目录下新建spring.factories文件；写入如下内容：</p>
+</blockquote>
+<figure class="highlight properties"><table><tr><td class="code"><pre><span class="line"><span class="meta">com.windh.springspi.interfaces.InitServiceInterFace</span>=<span class="string">\</span></span><br><span class="line">  <span class="attr">com.windh.springspi.impl.LogInit</span></span><br></pre></td></tr></table></figure>
+
+<h2 id="2-4-测试"><a href="#2-4-测试" class="headerlink" title="2.4 测试"></a>2.4 测试</h2><figure class="highlight java"><table><tr><td class="code"><pre><span class="line"></span><br><span class="line"><span class="keyword">import</span> com.windh.springspi.interfaces.InitServiceInterFace;</span><br><span class="line"><span class="keyword">import</span> lombok.extern.slf4j.Slf4j;</span><br><span class="line"><span class="keyword">import</span> org.springframework.boot.SpringApplication;</span><br><span class="line"><span class="keyword">import</span> org.springframework.boot.autoconfigure.SpringBootApplication;</span><br><span class="line"><span class="keyword">import</span> org.springframework.context.ConfigurableApplicationContext;</span><br><span class="line"><span class="keyword">import</span> org.springframework.core.io.support.SpringFactoriesLoader;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> java.util.List;</span><br><span class="line"></span><br><span class="line"><span class="meta">@Slf</span>4j</span><br><span class="line"><span class="meta">@SpringBootApplication</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">SpringspiApplication</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">        ConfigurableApplicationContext run = SpringApplication.run(SpringspiApplication<span class="class">.<span class="keyword">class</span>, <span class="title">args</span>)</span>;</span><br><span class="line">        List&lt;InitServiceInterFace&gt; serviceLoader = SpringFactoriesLoader.loadFactories(</span><br><span class="line">                InitServiceInterFace<span class="class">.<span class="keyword">class</span>, <span class="title">Thread</span>.<span class="title">currentThread</span>().<span class="title">getContextClassLoader</span>())</span>;</span><br><span class="line">        <span class="keyword">for</span> (InitServiceInterFace initServiceInterFace : serviceLoader) &#123;</span><br><span class="line">            initServiceInterFace.init(run);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>日志输入如下：</p>
+<img style="margin:auto 0;" src="/2020/07/01/SPI%E6%9C%BA%E5%88%B6/SPI-1.png" alt="SPI-1.png">]]></content>
+      <categories>
+        <category>SPI</category>
+      </categories>
+      <tags>
+        <tag>SpringBoot</tag>
+        <tag>SPI</tag>
       </tags>
   </entry>
 </search>
