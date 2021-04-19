@@ -43,6 +43,32 @@
       </tags>
   </entry>
   <entry>
+    <title>Hexo Hello World</title>
+    <url>/2020/05/25/Hexo-hello-world/</url>
+    <content><![CDATA[<p>Welcome to <a href="https://hexo.io/" target="_blank" rel="noopener">Hexo</a>! This is your very first post. Check <a href="https://hexo.io/docs/" target="_blank" rel="noopener">documentation</a> for more info. If you get any problems when using Hexo, you can find the answer in <a href="https://hexo.io/docs/troubleshooting.html" target="_blank" rel="noopener">troubleshooting</a> or you can ask me on <a href="https://github.com/hexojs/hexo/issues" target="_blank" rel="noopener">GitHub</a>.</p>
+<h2 id="Quick-Start"><a href="#Quick-Start" class="headerlink" title="Quick Start"></a>Quick Start</h2><h3 id="Create-a-new-post"><a href="#Create-a-new-post" class="headerlink" title="Create a new post"></a>Create a new post</h3><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ hexo new <span class="string">"My New Post"</span></span><br></pre></td></tr></table></figure>
+
+<p>More info: <a href="https://hexo.io/docs/writing.html" target="_blank" rel="noopener">Writing</a></p>
+<h3 id="Run-server"><a href="#Run-server" class="headerlink" title="Run server"></a>Run server</h3><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ hexo server</span><br></pre></td></tr></table></figure>
+
+<p>More info: <a href="https://hexo.io/docs/server.html" target="_blank" rel="noopener">Server</a></p>
+<h3 id="Generate-static-files"><a href="#Generate-static-files" class="headerlink" title="Generate static files"></a>Generate static files</h3><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ hexo generate</span><br></pre></td></tr></table></figure>
+
+<p>More info: <a href="https://hexo.io/docs/generating.html" target="_blank" rel="noopener">Generating</a></p>
+<a id="more"></a>
+
+<h3 id="Deploy-to-remote-sites"><a href="#Deploy-to-remote-sites" class="headerlink" title="Deploy to remote sites"></a>Deploy to remote sites</h3><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ hexo deploy</span><br></pre></td></tr></table></figure>
+
+<p>More info: <a href="https://hexo.io/docs/one-command-deployment.html" target="_blank" rel="noopener">Deployment</a></p>
+]]></content>
+      <categories>
+        <category>Hexo</category>
+      </categories>
+      <tags>
+        <tag>Hello World</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>关于我</title>
     <url>/2020/05/25/AboutMe/</url>
     <content><![CDATA[<p>🌱  I’m currently learning</p>
@@ -76,32 +102,6 @@
       <tags>
         <tag>Java</tag>
         <tag>ArrayList</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>Hexo Hello World</title>
-    <url>/2020/05/25/Hexo-hello-world/</url>
-    <content><![CDATA[<p>Welcome to <a href="https://hexo.io/" target="_blank" rel="noopener">Hexo</a>! This is your very first post. Check <a href="https://hexo.io/docs/" target="_blank" rel="noopener">documentation</a> for more info. If you get any problems when using Hexo, you can find the answer in <a href="https://hexo.io/docs/troubleshooting.html" target="_blank" rel="noopener">troubleshooting</a> or you can ask me on <a href="https://github.com/hexojs/hexo/issues" target="_blank" rel="noopener">GitHub</a>.</p>
-<h2 id="Quick-Start"><a href="#Quick-Start" class="headerlink" title="Quick Start"></a>Quick Start</h2><h3 id="Create-a-new-post"><a href="#Create-a-new-post" class="headerlink" title="Create a new post"></a>Create a new post</h3><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ hexo new <span class="string">"My New Post"</span></span><br></pre></td></tr></table></figure>
-
-<p>More info: <a href="https://hexo.io/docs/writing.html" target="_blank" rel="noopener">Writing</a></p>
-<h3 id="Run-server"><a href="#Run-server" class="headerlink" title="Run server"></a>Run server</h3><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ hexo server</span><br></pre></td></tr></table></figure>
-
-<p>More info: <a href="https://hexo.io/docs/server.html" target="_blank" rel="noopener">Server</a></p>
-<h3 id="Generate-static-files"><a href="#Generate-static-files" class="headerlink" title="Generate static files"></a>Generate static files</h3><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ hexo generate</span><br></pre></td></tr></table></figure>
-
-<p>More info: <a href="https://hexo.io/docs/generating.html" target="_blank" rel="noopener">Generating</a></p>
-<a id="more"></a>
-
-<h3 id="Deploy-to-remote-sites"><a href="#Deploy-to-remote-sites" class="headerlink" title="Deploy to remote sites"></a>Deploy to remote sites</h3><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ hexo deploy</span><br></pre></td></tr></table></figure>
-
-<p>More info: <a href="https://hexo.io/docs/one-command-deployment.html" target="_blank" rel="noopener">Deployment</a></p>
-]]></content>
-      <categories>
-        <category>Hexo</category>
-      </categories>
-      <tags>
-        <tag>Hello World</tag>
       </tags>
   </entry>
   <entry>
@@ -284,39 +284,6 @@
       </tags>
   </entry>
   <entry>
-    <title>SPI机制</title>
-    <url>/2020/07/01/SPI%E6%9C%BA%E5%88%B6/</url>
-    <content><![CDATA[<p><strong>本blog的出现是为了能够分享个人所学的相关知识，检验自身学习成果。内容会和其他技术存在部分关联，如有任何描述错误或者说明有误的地方，还望各位大佬指出。</strong></p>
-<h1 id="1-什么是SPI"><a href="#1-什么是SPI" class="headerlink" title="1. 什么是SPI"></a>1. 什么是SPI</h1><h2 id="1-1-SPI思想"><a href="#1-1-SPI思想" class="headerlink" title="1.1 SPI思想"></a>1.1 SPI思想</h2><p>SPI的全名为Service Provider Interface.这个是针对厂商或者插件的。</p>
-<h2 id="1-2-SPI约定"><a href="#1-2-SPI约定" class="headerlink" title="1.2 SPI约定"></a>1.2 SPI约定</h2><h3 id="1-2-1-Java"><a href="#1-2-1-Java" class="headerlink" title="1.2.1 Java"></a>1.2.1 Java</h3><p>当服务的提供者，提供了服务接口的一种实现之后，在jar包的META-INF/services/目录里创建一个以服务接口命名的文件。</p>
-<h3 id="1-2-2-Spring"><a href="#1-2-2-Spring" class="headerlink" title="1.2.2 Spring"></a>1.2.2 Spring</h3><p>在jar包的META-INF/目录里创建一个spring.factories，所有spi对应关系都可以写在这个文件中。</p>
-<h1 id="2-Spring中的SPI"><a href="#2-Spring中的SPI" class="headerlink" title="2. Spring中的SPI"></a>2. Spring中的SPI</h1><blockquote>
-<p>本文介绍下spring的SPI</p>
-</blockquote>
-<h2 id="2-1-定义一个接口"><a href="#2-1-定义一个接口" class="headerlink" title="2.1 定义一个接口"></a>2.1 定义一个接口</h2><figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> org.springframework.context.ApplicationContext;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">interface</span> <span class="title">InitServiceInterFace</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">void</span> <span class="title">init</span><span class="params">(<span class="keyword">final</span> ApplicationContext context)</span></span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<a id="more"></a>
-
-<h2 id="2-2-编写一个接口的实现类"><a href="#2-2-编写一个接口的实现类" class="headerlink" title="2.2 编写一个接口的实现类"></a>2.2 编写一个接口的实现类</h2><figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> com.windh.springspi.interfaces.InitServiceInterFace;</span><br><span class="line"><span class="keyword">import</span> lombok.extern.slf4j.Slf4j;</span><br><span class="line"><span class="keyword">import</span> org.springframework.context.ApplicationContext;</span><br><span class="line"></span><br><span class="line"><span class="meta">@Slf</span>4j</span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">LogInit</span> <span class="keyword">implements</span> <span class="title">InitServiceInterFace</span> </span>&#123;</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">init</span><span class="params">(ApplicationContext context)</span> </span>&#123;</span><br><span class="line">        <span class="comment">// TODO init LogInit</span></span><br><span class="line">        log.info(<span class="string">"Init My Log."</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<h2 id="2-3-新建spi所需静态文件"><a href="#2-3-新建spi所需静态文件" class="headerlink" title="2.3 新建spi所需静态文件"></a>2.3 新建spi所需静态文件</h2><blockquote>
-<p>在Resources静态资源目录下新建spring.factories文件；写入如下内容：</p>
-</blockquote>
-<figure class="highlight properties"><table><tr><td class="code"><pre><span class="line"><span class="meta">com.windh.springspi.interfaces.InitServiceInterFace</span>=<span class="string">\</span></span><br><span class="line">  <span class="attr">com.windh.springspi.impl.LogInit</span></span><br></pre></td></tr></table></figure>
-
-<h2 id="2-4-测试"><a href="#2-4-测试" class="headerlink" title="2.4 测试"></a>2.4 测试</h2><figure class="highlight java"><table><tr><td class="code"><pre><span class="line"></span><br><span class="line"><span class="keyword">import</span> com.windh.springspi.interfaces.InitServiceInterFace;</span><br><span class="line"><span class="keyword">import</span> lombok.extern.slf4j.Slf4j;</span><br><span class="line"><span class="keyword">import</span> org.springframework.boot.SpringApplication;</span><br><span class="line"><span class="keyword">import</span> org.springframework.boot.autoconfigure.SpringBootApplication;</span><br><span class="line"><span class="keyword">import</span> org.springframework.context.ConfigurableApplicationContext;</span><br><span class="line"><span class="keyword">import</span> org.springframework.core.io.support.SpringFactoriesLoader;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> java.util.List;</span><br><span class="line"></span><br><span class="line"><span class="meta">@Slf</span>4j</span><br><span class="line"><span class="meta">@SpringBootApplication</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">SpringspiApplication</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">        ConfigurableApplicationContext run = SpringApplication.run(SpringspiApplication<span class="class">.<span class="keyword">class</span>, <span class="title">args</span>)</span>;</span><br><span class="line">        List&lt;InitServiceInterFace&gt; serviceLoader = SpringFactoriesLoader.loadFactories(</span><br><span class="line">                InitServiceInterFace<span class="class">.<span class="keyword">class</span>, <span class="title">Thread</span>.<span class="title">currentThread</span>().<span class="title">getContextClassLoader</span>())</span>;</span><br><span class="line">        <span class="keyword">for</span> (InitServiceInterFace initServiceInterFace : serviceLoader) &#123;</span><br><span class="line">            initServiceInterFace.init(run);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>日志输入如下：</p>
-<img style="margin:auto 0;border:1px solid #cce5ff;" src="/2020/07/01/SPI%E6%9C%BA%E5%88%B6/SPI-1.png" alt="SPI-1.png">]]></content>
-      <categories>
-        <category>SPI</category>
-      </categories>
-      <tags>
-        <tag>SpringBoot</tag>
-        <tag>SPI</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>Quartz</title>
     <url>/2020/06/28/Quartz/</url>
     <content><![CDATA[<blockquote>
@@ -350,6 +317,39 @@
       </categories>
       <tags>
         <tag>Quartz</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>SPI机制</title>
+    <url>/2020/07/01/SPI%E6%9C%BA%E5%88%B6/</url>
+    <content><![CDATA[<p><strong>本blog的出现是为了能够分享个人所学的相关知识，检验自身学习成果。内容会和其他技术存在部分关联，如有任何描述错误或者说明有误的地方，还望各位大佬指出。</strong></p>
+<h1 id="1-什么是SPI"><a href="#1-什么是SPI" class="headerlink" title="1. 什么是SPI"></a>1. 什么是SPI</h1><h2 id="1-1-SPI思想"><a href="#1-1-SPI思想" class="headerlink" title="1.1 SPI思想"></a>1.1 SPI思想</h2><p>SPI的全名为Service Provider Interface.这个是针对厂商或者插件的。</p>
+<h2 id="1-2-SPI约定"><a href="#1-2-SPI约定" class="headerlink" title="1.2 SPI约定"></a>1.2 SPI约定</h2><h3 id="1-2-1-Java"><a href="#1-2-1-Java" class="headerlink" title="1.2.1 Java"></a>1.2.1 Java</h3><p>当服务的提供者，提供了服务接口的一种实现之后，在jar包的META-INF/services/目录里创建一个以服务接口命名的文件。</p>
+<h3 id="1-2-2-Spring"><a href="#1-2-2-Spring" class="headerlink" title="1.2.2 Spring"></a>1.2.2 Spring</h3><p>在jar包的META-INF/目录里创建一个spring.factories，所有spi对应关系都可以写在这个文件中。</p>
+<h1 id="2-Spring中的SPI"><a href="#2-Spring中的SPI" class="headerlink" title="2. Spring中的SPI"></a>2. Spring中的SPI</h1><blockquote>
+<p>本文介绍下spring的SPI</p>
+</blockquote>
+<h2 id="2-1-定义一个接口"><a href="#2-1-定义一个接口" class="headerlink" title="2.1 定义一个接口"></a>2.1 定义一个接口</h2><figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> org.springframework.context.ApplicationContext;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">interface</span> <span class="title">InitServiceInterFace</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">void</span> <span class="title">init</span><span class="params">(<span class="keyword">final</span> ApplicationContext context)</span></span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<a id="more"></a>
+
+<h2 id="2-2-编写一个接口的实现类"><a href="#2-2-编写一个接口的实现类" class="headerlink" title="2.2 编写一个接口的实现类"></a>2.2 编写一个接口的实现类</h2><figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> com.windh.springspi.interfaces.InitServiceInterFace;</span><br><span class="line"><span class="keyword">import</span> lombok.extern.slf4j.Slf4j;</span><br><span class="line"><span class="keyword">import</span> org.springframework.context.ApplicationContext;</span><br><span class="line"></span><br><span class="line"><span class="meta">@Slf</span>4j</span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">LogInit</span> <span class="keyword">implements</span> <span class="title">InitServiceInterFace</span> </span>&#123;</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">init</span><span class="params">(ApplicationContext context)</span> </span>&#123;</span><br><span class="line">        <span class="comment">// TODO init LogInit</span></span><br><span class="line">        log.info(<span class="string">"Init My Log."</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="2-3-新建spi所需静态文件"><a href="#2-3-新建spi所需静态文件" class="headerlink" title="2.3 新建spi所需静态文件"></a>2.3 新建spi所需静态文件</h2><blockquote>
+<p>在Resources静态资源目录下新建spring.factories文件；写入如下内容：</p>
+</blockquote>
+<figure class="highlight properties"><table><tr><td class="code"><pre><span class="line"><span class="meta">com.windh.springspi.interfaces.InitServiceInterFace</span>=<span class="string">\</span></span><br><span class="line">  <span class="attr">com.windh.springspi.impl.LogInit</span></span><br></pre></td></tr></table></figure>
+
+<h2 id="2-4-测试"><a href="#2-4-测试" class="headerlink" title="2.4 测试"></a>2.4 测试</h2><figure class="highlight java"><table><tr><td class="code"><pre><span class="line"></span><br><span class="line"><span class="keyword">import</span> com.windh.springspi.interfaces.InitServiceInterFace;</span><br><span class="line"><span class="keyword">import</span> lombok.extern.slf4j.Slf4j;</span><br><span class="line"><span class="keyword">import</span> org.springframework.boot.SpringApplication;</span><br><span class="line"><span class="keyword">import</span> org.springframework.boot.autoconfigure.SpringBootApplication;</span><br><span class="line"><span class="keyword">import</span> org.springframework.context.ConfigurableApplicationContext;</span><br><span class="line"><span class="keyword">import</span> org.springframework.core.io.support.SpringFactoriesLoader;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> java.util.List;</span><br><span class="line"></span><br><span class="line"><span class="meta">@Slf</span>4j</span><br><span class="line"><span class="meta">@SpringBootApplication</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">SpringspiApplication</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">        ConfigurableApplicationContext run = SpringApplication.run(SpringspiApplication<span class="class">.<span class="keyword">class</span>, <span class="title">args</span>)</span>;</span><br><span class="line">        List&lt;InitServiceInterFace&gt; serviceLoader = SpringFactoriesLoader.loadFactories(</span><br><span class="line">                InitServiceInterFace<span class="class">.<span class="keyword">class</span>, <span class="title">Thread</span>.<span class="title">currentThread</span>().<span class="title">getContextClassLoader</span>())</span>;</span><br><span class="line">        <span class="keyword">for</span> (InitServiceInterFace initServiceInterFace : serviceLoader) &#123;</span><br><span class="line">            initServiceInterFace.init(run);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>日志输入如下：</p>
+<img style="margin:auto 0;border:1px solid #cce5ff;" src="/2020/07/01/SPI%E6%9C%BA%E5%88%B6/SPI-1.png" alt="SPI-1.png">]]></content>
+      <categories>
+        <category>SPI</category>
+      </categories>
+      <tags>
+        <tag>SpringBoot</tag>
+        <tag>SPI</tag>
       </tags>
   </entry>
   <entry>
