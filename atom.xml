@@ -6,7 +6,7 @@
   <link href="/atom.xml" rel="self"/>
   
   <link href="https://wind-hu.github.io/"/>
-  <updated>2021-04-20T16:06:35.115Z</updated>
+  <updated>2021-04-20T16:28:33.509Z</updated>
   <id>https://wind-hu.github.io/</id>
   
   <author>
@@ -21,7 +21,7 @@
     <link href="https://wind-hu.github.io/2020/08/19/%E4%BD%BF%E7%94%A8GitHub%20Action%E8%87%AA%E5%8A%A8%E5%90%8C%E6%AD%A5%E4%BB%A3%E7%A0%81%E5%88%B0Gitee/"/>
     <id>https://wind-hu.github.io/2020/08/19/%E4%BD%BF%E7%94%A8GitHub%20Action%E8%87%AA%E5%8A%A8%E5%90%8C%E6%AD%A5%E4%BB%A3%E7%A0%81%E5%88%B0Gitee/</id>
     <published>2020-08-19T14:12:40.000Z</published>
-    <updated>2021-04-20T16:06:35.115Z</updated>
+    <updated>2021-04-20T16:28:33.509Z</updated>
     
     <summary type="html">
     
@@ -262,9 +262,9 @@
     
       <category term="Java" scheme="https://wind-hu.github.io/tags/Java/"/>
     
-      <category term="Spring" scheme="https://wind-hu.github.io/tags/Spring/"/>
-    
       <category term="SpringBoot" scheme="https://wind-hu.github.io/tags/SpringBoot/"/>
+    
+      <category term="Spring" scheme="https://wind-hu.github.io/tags/Spring/"/>
     
   </entry>
   
